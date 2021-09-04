@@ -444,7 +444,7 @@ intersect all
 except
 (select course_id from section where semester = 'Spring' and year = 2009);
 
-//保留所有重复
+// 保留所有重复
 (select course_id from section where semester = 'Fall' and year = 2009)
 except all
 (select course_id from section where semester = 'Spring' and year = 2009);
@@ -463,6 +463,95 @@ unknown：既不是is null，也不是is not null。
 平均值avg，最小值min，最大值max，总和sum，计数count。
 
 ```mysql
+// 计算平均值
+select avg(salary) as avg_salary from insructor where dept_name='Comp.Sci.';
 
+// 在计数时保留重复
+select count(ID) from teaches where semester = 'Spring' and year = 2010;
+
+// 在计数时不保留重复
+select count(distinct ID) from teaches where semester = 'Spring' and year = 2010;
 ```
 
+
+
+**分组聚集**：
+
+```mysql
+// group by
+select dept_name,avg(salary) as avg_salary from instructor group by dept_name;
+
+// having 对分组限定条件
+select dept_name,avg(salary) as avg_salary from instructor
+group by dept_name having avg(salary) > 42000;
+```
+
+
+
+**嵌套子查询**：
+
+```mysql
+// 范围内查询
+select distinct course_id from section where semester = 'Fall' and year = 2009
+and course_id in 
+(select course_id from section where semester = 'Spring' and year = 2010);
+
+// 不在范围内查询
+select distinct name from instructor where name not in ('Mozart','Einstein');
+
+// 集合的比较
+// some
+select name from instructor 
+where salary > some(select salary from instructor where dept_name = 'Biology');
+
+// all
+select dept_name from instructor group by dept_name 
+having avg(salary) >= all(select avg(salary) from instructor group by dept_name);
+
+// 空关系测试 exists
+select course_id from section as S where semester = 'Fall' and year = 2009
+and exists(select * from section as S where semester = 'Spring' and year = 2010
+          and S.course_id = T.course_id);
+          
+// 不存在 not exists ... except
+select S.ID,S.name from student as S where not exists
+(select course_id from course where dept_name = 'Biology') except
+(select T.course_id from takes as T where S.ID = T.ID);
+
+// 重复元组存在性 unique/not unique
+select T.course_id from course as T where unique
+(select R.course_id from section as R 
+ where T.course_id = R.course_id and R.year = 2009);
+
+// from 子句中的子查询
+select dept_name,avg_salary 
+from (select dept_name,avg(salary) from instructor group by dept_name)
+as dept_avg(dept_name,avg_salary) where avg_salary = 42000;
+
+// with 定义临时关系
+with dept_total(dept_name,value) as 
+(select dept_name,sum(salary) from instructor group by dept_name),
+dept_total_avg(value) as (select avg(value) from dept_total)
+select dept_name from dept_total,dept_total_avg 
+where dept_total.value >= dept_total_avg.value;
+```
+
+
+
+**修改数据库**：
+
+```mysql
+// 删除
+delete from instructor where dept_name = 'Finance';
+
+// 插入
+insert into course values ('CS-437','Database Systems','Comp.Sci',4);
+
+// 更新（在不改变元组的情况下改变部分属性值）
+updata instructor set salary = salary*2 where salary < 70000;
+
+// 分类更新
+updata instructor set salary = case
+when salary <= 100000 then salary*2 else salary*3
+end
+```
