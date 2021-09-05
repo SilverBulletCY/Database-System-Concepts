@@ -27,3 +27,27 @@ $$
 \Pi_{instructor.salary}(\sigma_{instructor.salary < d.salary}(instructor \times 
 \rho_{d}(instructor)))
 $$
+
+集合交运算：
+$$
+\Pi_{course\_id}(\sigma_{semester="Fall"\land year=2009}(section)) \cap
+\Pi_{course\_id}(\sigma_{semester="Spring"\land year=2010(section)})
+$$
+自然连接运算：
+$$
+\Pi_{name,course\_id}(instructor \bowtie teaches)
+$$
+赋值运算：
+$$
+temp1\leftarrow R\times S
+$$
+外连接运算：
+
+1. 左外连接：⟕
+2. 右外连接：⟖
+3. 全外连接：⟗
+
+聚集运算：
+$$
+\mathcal{G}_{\textbf {sum}(salary)}(instructor)
+$$
