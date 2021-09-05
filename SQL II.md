@@ -129,6 +129,25 @@ revoke update (budget) on department from Amit,Satoshi;
 **角色**：
 
 ```mysql
+// 创建角色
+create role instructor;
 
+// 授予权限
+grant select on takes to instructor;
+
+// 授予角色
+grant instructor to Amit;
+
+// 允许权限转移
+//grant select on department to Amit with grant option;
+
+// 级联收回权限
+revoke select on department from Amit,Satoshi cascade;
+
+// 防止级联收回
+revoke select on department from Amit,Satoshi restrict;
+
+// 收回权限转移的权限
+revoke grant option for select on department from Amit;
 ```
 
